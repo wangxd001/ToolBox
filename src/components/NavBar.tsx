@@ -30,7 +30,7 @@ export function NavBar() {
                 key={t.to}
                 to={t.to}
                 className={({ isActive }) =>
-                  `min-h-[40px] rounded-lg px-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
+                  `flex min-h-[40px] cursor-pointer items-center rounded-lg px-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
                     isActive || (activeTool?.to === t.to)
                       ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-300'
                       : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:text-slate-400 dark:hover:bg-slate-800/60 dark:hover:text-slate-200'
