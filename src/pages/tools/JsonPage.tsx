@@ -1,8 +1,11 @@
 import { useState } from 'react'
 import { ToolLayout } from '../../components/ToolLayout'
 import { CopyButton } from '../../components/CopyButton'
-import { ErrorText } from '../../components/ErrorText'
+import { ErrorText, Toast } from '../../components/ErrorText'
+import { ExampleButton } from '../../components/ExampleButton'
 import { HistoryPanel } from '../../components/HistoryPanel'
+import { Card, Btn, TextArea, Segmented, Badge } from '../../components/ui'
+import { BracesIcon } from '../../components/Icons'
 import { useSeo } from '../../lib/useSeo'
 import {
   readHistory,
@@ -30,6 +33,7 @@ export function JsonPage() {
   const [input, setInput] = useState(EXAMPLE)
   const [indent, setIndent] = useState<2 | 4>(2)
   const [output, setOutput] = useState('')
+  const [valid, setValid] = useState<boolean | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [toast, setToast] = useState<string | null>(null)
   const [history, setHistory] = useState<HistoryEntry[]>(() =>
@@ -54,23 +58,29 @@ export function JsonPage() {
 
   const run = (action: 'format' | 'minify' | 'validate' | 'sort') => {
     setError(null)
+    setValid(null)
     let out = ''
     if (action === 'format') {
       const r = formatJson(input, indent)
       if (typeof r === 'object') {
         setError(r.error)
+        setOutput('')
         return
       }
       out = r
+      setValid(true)
     } else if (action === 'minify') {
       const r = minifyJson(input)
       if (typeof r === 'object') {
         setError(r.error)
+        setOutput('')
         return
       }
       out = r
+      setValid(true)
     } else if (action === 'validate') {
       const r = validateJson(input)
+      setValid(r.ok)
       if (r.ok) {
         out = '✓ 合法 JSON'
       } else {
@@ -81,10 +91,12 @@ export function JsonPage() {
       const r = formatJson(input, indent)
       if (typeof r === 'object') {
         setError(r.error)
+        setOutput('')
         return
       }
       const sorted = sortKeysDeep(JSON.parse(input))
       out = JSON.stringify(sorted, null, indent)
+      setValid(true)
     }
     setOutput(out)
     if (action === 'format' || action === 'minify' || action === 'sort') {
@@ -95,84 +107,86 @@ export function JsonPage() {
   const fillExample = () => {
     setInput(EXAMPLE)
     setOutput('')
+    setValid(null)
     setError(null)
   }
 
   const reset = () => {
     setInput(EXAMPLE)
     setOutput('')
+    setValid(null)
     setError(null)
   }
 
   return (
     <ToolLayout title="JSON 工具" description="格式化、压缩、校验、按键名排序">
       {/* 输入区 */}
-      <div className="mb-3">
-        <textarea
+      <Card
+        title="输入"
+        action={
+          <div className="flex items-center gap-3">
+            <span className="text-xs font-medium text-slate-500 dark:text-slate-400">缩进</span>
+            <Segmented
+              options={[
+                { value: '2', label: '2 空格' },
+                { value: '4', label: '4 空格' },
+              ]}
+              value={String(indent)}
+              onChange={(v) => setIndent(v === '4' ? 4 : 2)}
+              className="w-40"
+            />
+          </div>
+        }
+      >
+        <TextArea
           value={input}
           onChange={(e) => setInput(e.target.value)}
           rows={8}
-          className="w-full rounded-md border border-gray-300 p-3 font-mono text-sm min-h-[44px] dark:border-gray-600 dark:bg-gray-800"
           placeholder="输入 JSON"
         />
-      </div>
-
-      {/* 缩进选择 */}
-      <div className="mb-3 flex items-center gap-3 text-sm">
-        <span className="text-gray-600 dark:text-gray-400">缩进</span>
-        <button
-          type="button"
-          onClick={() => setIndent(2)}
-          className={`min-h-[44px] px-3 rounded ${indent === 2 ? 'bg-blue-600 text-white' : 'bg-gray-100 dark:bg-gray-800'}`}
-        >
-          2 空格
-        </button>
-        <button
-          type="button"
-          onClick={() => setIndent(4)}
-          className={`min-h-[44px] px-3 rounded ${indent === 4 ? 'bg-blue-600 text-white' : 'bg-gray-100 dark:bg-gray-800'}`}
-        >
-          4 空格
-        </button>
-      </div>
+      </Card>
 
       {/* 操作按钮区 */}
-      <div className="mb-4 flex flex-wrap gap-2">
-        <button type="button" onClick={() => run('format')} className="min-h-[44px] rounded-md bg-blue-600 px-4 text-sm text-white hover:bg-blue-700">
-          格式化
-        </button>
-        <button type="button" onClick={() => run('minify')} className="min-h-[44px] rounded-md border border-gray-300 px-4 text-sm text-gray-700 dark:border-gray-600 dark:text-gray-200">
-          压缩
-        </button>
-        <button type="button" onClick={() => run('validate')} className="min-h-[44px] rounded-md border border-gray-300 px-4 text-sm text-gray-700 dark:border-gray-600 dark:text-gray-200">
-          校验
-        </button>
-        <button type="button" onClick={() => run('sort')} className="min-h-[44px] rounded-md border border-gray-300 px-4 text-sm text-gray-700 dark:border-gray-600 dark:text-gray-200">
-          按键名排序
-        </button>
-        <button type="button" onClick={fillExample} className="min-h-[44px] rounded-md border border-gray-300 px-3 text-sm text-gray-700 dark:border-gray-600 dark:text-gray-200">
-          填入示例
-        </button>
-        <button type="button" onClick={reset} className="min-h-[44px] rounded-md border border-gray-300 px-3 text-sm text-gray-700 dark:border-gray-600 dark:text-gray-200">
-          重置
-        </button>
-        {output && <CopyButton text={output} label="复制结果" />}
-      </div>
+      <Card bodyClassName="px-4 py-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <Btn variant="primary" onClick={() => run('format')}>
+            <BracesIcon size={16} />
+            格式化
+          </Btn>
+          <Btn variant="secondary" onClick={() => run('minify')}>压缩</Btn>
+          <Btn variant="secondary" onClick={() => run('validate')}>校验</Btn>
+          <Btn variant="secondary" onClick={() => run('sort')}>按键名排序</Btn>
+          <ExampleButton onClick={fillExample} />
+          <Btn variant="ghost" onClick={reset}>重置</Btn>
+          {output && <CopyButton text={output} label="复制结果" />}
+        </div>
+      </Card>
 
       {/* 输出区 */}
       {output && (
-        <pre className="mb-3 max-h-64 overflow-auto whitespace-pre-wrap rounded-md bg-gray-50 p-3 font-mono text-sm dark:bg-gray-800">
-          {output}
-        </pre>
+        <Card
+          title="结果"
+          action={
+            <div className="flex items-center gap-2">
+              {valid !== null && (
+                <Badge tone={valid ? 'success' : 'error'}>
+                  {valid ? '合法' : '非法'}
+                </Badge>
+              )}
+              <CopyButton text={output} label="复制" iconOnly />
+            </div>
+          }
+          bodyClassName="px-0 py-0"
+        >
+          <pre className="max-h-96 overflow-auto whitespace-pre-wrap p-4 font-mono text-sm leading-relaxed text-slate-800 dark:text-slate-200">
+            {output}
+          </pre>
+        </Card>
       )}
 
       {/* 错误区 */}
       <ErrorText message={error} />
-      {toast && (
-        <div className="mt-3 rounded-md bg-yellow-100 p-2 text-sm text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-200">
-          {toast}
-        </div>
-      )}
+      <Toast message={toast} />
 
       {/* 历史 */}
       <HistoryPanel
@@ -181,7 +195,12 @@ export function JsonPage() {
           clearHistory(HISTORY_KEY)
           setHistory([])
         }}
-        onPick={(entry) => setInput(entry.text)}
+        onPick={(entry) => {
+          setInput(entry.text)
+          setOutput('')
+          setValid(null)
+          setError(null)
+        }}
       />
     </ToolLayout>
   )

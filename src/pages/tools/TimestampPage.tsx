@@ -2,9 +2,11 @@ import { useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { ToolLayout } from '../../components/ToolLayout'
 import { CopyButton } from '../../components/CopyButton'
-import { ErrorText } from '../../components/ErrorText'
+import { ErrorText, Toast } from '../../components/ErrorText'
 import { ExampleButton } from '../../components/ExampleButton'
 import { HistoryPanel } from '../../components/HistoryPanel'
+import { Card, Btn, Segmented, Label, TextInput } from '../../components/ui'
+import { CheckIcon, ClockIcon } from '../../components/Icons'
 import { useSeo } from '../../lib/useSeo'
 import {
   readHistory,
@@ -184,107 +186,99 @@ export function TimestampPage() {
       description="Unix 时间戳与日期时间互转，本地时区 / UTC"
     >
       {/* 实时时钟 */}
-      <div className="mb-4 rounded-md bg-gray-50 p-3 dark:bg-gray-800">
-        <div className="text-xs text-gray-500 dark:text-gray-400">当前时间戳</div>
-        <div className="font-mono text-lg">{currentTsDisplay}</div>
-        <div className="flex gap-2 mt-2">
-          <button
-            type="button"
-            onClick={() => setUnit('s')}
-            className={`min-h-[44px] px-3 text-sm rounded ${unit === 's' ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-gray-700'}`}
-          >
-            秒
-          </button>
-          <button
-            type="button"
-            onClick={() => setUnit('ms')}
-            className={`min-h-[44px] px-3 text-sm rounded ${unit === 'ms' ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-gray-700'}`}
-          >
-            毫秒
-          </button>
-        </div>
-      </div>
-
-      {/* 模式切换 */}
-      <div className="mb-4 flex gap-2">
-        <button
-          type="button"
-          onClick={() => setMode('toTime')}
-          className={`min-h-[44px] flex-1 rounded-md px-3 text-sm ${mode === 'toTime' ? 'bg-blue-600 text-white' : 'bg-gray-100 dark:bg-gray-800'}`}
-        >
-          时间戳 → 时间
-        </button>
-        <button
-          type="button"
-          onClick={() => setMode('toTs')}
-          className={`min-h-[44px] flex-1 rounded-md px-3 text-sm ${mode === 'toTs' ? 'bg-blue-600 text-white' : 'bg-gray-100 dark:bg-gray-800'}`}
-        >
-          时间 → 时间戳
-        </button>
-      </div>
-
-      {/* 输入区 */}
-      {mode === 'toTime' ? (
-        <div className="mb-3">
-          <label className="mb-1 block text-sm text-gray-600 dark:text-gray-400">
-            时间戳（{unit === 's' ? '秒' : '毫秒'}）
-          </label>
-          <input
-            type="text"
-            value={tsInput}
-            onChange={(e) => setTsInput(e.target.value)}
-            placeholder="如 1700000000"
-            className="w-full rounded-md border border-gray-300 px-3 py-2 min-h-[44px] dark:border-gray-600 dark:bg-gray-800"
+      <Card
+        title="当前时间戳"
+        action={
+          <Segmented
+            options={[
+              { value: 's', label: '秒' },
+              { value: 'ms', label: '毫秒' },
+            ]}
+            value={unit}
+            onChange={(v) => setUnit(v as 's' | 'ms')}
+            className="w-40"
           />
+        }
+      >
+        <div className="flex items-center gap-3">
+          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-500/15 dark:text-indigo-300">
+            <ClockIcon size={20} />
+          </span>
+          <div>
+            <div className="font-mono text-2xl font-semibold tabular-nums">
+              {currentTsDisplay}
+            </div>
+            <div className="mt-0.5 text-xs text-slate-400 dark:text-slate-500">
+              {new Date(nowMs).toLocaleString('zh-CN')}
+            </div>
+          </div>
         </div>
-      ) : (
-        <div className="mb-3">
-          <label className="mb-1 block text-sm text-gray-600 dark:text-gray-400">
-            日期时间
-          </label>
-          <input
-            type="datetime-local"
-            value={dateInput}
-            onChange={(e) => setDateInput(e.target.value)}
-            className="w-full rounded-md border border-gray-300 px-3 py-2 min-h-[44px] dark:border-gray-600 dark:bg-gray-800"
+      </Card>
+
+      <Card>
+        <div className="space-y-4">
+          {/* 模式切换 */}
+          <Segmented
+            options={[
+              { value: 'toTime', label: '时间戳 → 时间' },
+              { value: 'toTs', label: '时间 → 时间戳' },
+            ]}
+            value={mode}
+            onChange={(v) => {
+              setMode(v as 'toTime' | 'toTs')
+              setError(null)
+            }}
           />
+
+          {/* 输入区 */}
+          {mode === 'toTime' ? (
+            <div>
+              <Label>时间戳（{unit === 's' ? '秒' : '毫秒'}）</Label>
+              <TextInput
+                type="text"
+                inputMode="numeric"
+                value={tsInput}
+                onChange={(e) => setTsInput(e.target.value)}
+                placeholder="如 1700000000"
+                className="font-mono"
+              />
+            </div>
+          ) : (
+            <div>
+              <Label>日期时间</Label>
+              <TextInput
+                type="datetime-local"
+                value={dateInput}
+                onChange={(e) => setDateInput(e.target.value)}
+              />
+            </div>
+          )}
+
+          {/* 操作按钮区 */}
+          <div className="flex flex-wrap items-center gap-2">
+            <Btn variant="primary" onClick={mode === 'toTime' ? handleConvertTs : handleConvertDate}>
+              <CheckIcon size={16} />
+              转换
+            </Btn>
+            <ExampleButton onClick={fillExample} />
+            <Btn variant="ghost" onClick={reset}>
+              重置
+            </Btn>
+            {resultText && <CopyButton text={resultText} label="复制结果" />}
+          </div>
+
+          {/* 输出区 */}
+          {resultText && (
+            <pre className="whitespace-pre-wrap rounded-xl bg-slate-50 p-4 font-mono text-sm leading-relaxed text-slate-800 dark:bg-slate-950/50 dark:text-slate-200">
+              {resultText}
+            </pre>
+          )}
         </div>
-      )}
-
-      {/* 操作按钮区 */}
-      <div className="mb-4 flex flex-wrap gap-2">
-        <button
-          type="button"
-          onClick={mode === 'toTime' ? handleConvertTs : handleConvertDate}
-          className="min-h-[44px] rounded-md bg-blue-600 px-4 text-sm text-white hover:bg-blue-700"
-        >
-          转换
-        </button>
-        <ExampleButton onClick={fillExample} />
-        <button
-          type="button"
-          onClick={reset}
-          className="min-h-[44px] rounded-md border border-gray-300 px-3 text-sm text-gray-700 dark:border-gray-600 dark:text-gray-200"
-        >
-          重置
-        </button>
-        {resultText && <CopyButton text={resultText} label="复制结果" />}
-      </div>
-
-      {/* 输出区 */}
-      {resultText && (
-        <pre className="mb-3 whitespace-pre-wrap rounded-md bg-gray-50 p-3 font-mono text-sm dark:bg-gray-800">
-          {resultText}
-        </pre>
-      )}
+      </Card>
 
       {/* 错误区 */}
       <ErrorText message={error} />
-      {toast && (
-        <div className="mt-3 rounded-md bg-yellow-100 p-2 text-sm text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-200">
-          {toast}
-        </div>
-      )}
+      <Toast message={toast} />
 
       {/* 历史 */}
       <HistoryPanel

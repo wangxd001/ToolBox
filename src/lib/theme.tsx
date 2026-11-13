@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { SunIcon, MoonIcon } from '../components/Icons'
 
 const THEME_KEY = 'toolbox.pref.theme'
 
@@ -40,16 +41,17 @@ export function useTheme(): [Theme, (next: Theme) => void] {
 
 export function ThemeToggle() {
   const [theme, setTheme] = useTheme()
+  const next = theme === 'dark' ? 'light' : 'dark'
 
   return (
     <button
       type="button"
-      onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-      className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-md border border-gray-300 px-3 text-sm text-gray-700 dark:border-gray-600 dark:text-gray-200"
-      aria-label={theme === 'dark' ? '切换到亮色' : '切换到暗色'}
-      title={theme === 'dark' ? '切换到亮色' : '切换到暗色'}
+      onClick={() => setTheme(next)}
+      className="flex min-h-[44px] min-w-[44px] cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition-colors hover:bg-slate-50 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-slate-100"
+      aria-label={next === 'dark' ? '切换到暗色' : '切换到亮色'}
+      title={next === 'dark' ? '切换到暗色' : '切换到亮色'}
     >
-      {theme === 'dark' ? '☀️' : '🌙'}
+      {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
     </button>
   )
 }

@@ -10,9 +10,9 @@ import { UrlPage } from './pages/tools/UrlPage'
 export default function App() {
   return (
     <BrowserRouter>
-      <div className="min-h-screen bg-white text-gray-900 dark:bg-gray-900 dark:text-gray-100">
+      <div className="flex min-h-dvh flex-col">
         <NavBar />
-        <main className="mx-auto max-w-4xl px-4 py-6">
+        <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-8">
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/tools/timestamp" element={<TimestampPage />} />
@@ -22,6 +22,12 @@ export default function App() {
             <Route path="/tools/url" element={<UrlPage />} />
           </Routes>
         </main>
+        <footer className="border-t border-slate-200/70 py-6 dark:border-slate-800/70">
+          <div className="mx-auto flex max-w-4xl items-center justify-between px-4 text-xs text-slate-400 dark:text-slate-500">
+            <p>纯前端工具，数据不出浏览器</p>
+            <p>Toolbox</p>
+          </div>
+        </footer>
       </div>
     </BrowserRouter>
   )

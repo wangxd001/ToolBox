@@ -2,7 +2,10 @@ import { useState } from 'react'
 import { ToolLayout } from '../../components/ToolLayout'
 import { CopyButton } from '../../components/CopyButton'
 import { ErrorText } from '../../components/ErrorText'
+import { ExampleButton } from '../../components/ExampleButton'
 import { HistoryPanel } from '../../components/HistoryPanel'
+import { Card, Btn, Label, TextInput, CheckBox } from '../../components/ui'
+import { HashIcon } from '../../components/Icons'
 import { useSeo } from '../../lib/useSeo'
 import {
   readHistory,
@@ -78,86 +81,63 @@ export function UuidPage() {
   return (
     <ToolLayout title="UUID 生成" description="批量生成 UUID v4，支持大小写与格式选项">
       {/* 输入区 */}
-      <div className="mb-4">
-        <label className="mb-1 block text-sm text-gray-600 dark:text-gray-400">
-          数量（1~100）
-        </label>
-        <input
-          type="number"
-          min={1}
-          max={100}
-          value={count}
-          onChange={(e) => setCount(Number(e.target.value))}
-          className="w-32 rounded-md border border-gray-300 px-3 py-2 min-h-[44px] dark:border-gray-600 dark:bg-gray-800"
-        />
-      </div>
+      <Card>
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <Label>数量（1~100）</Label>
+              <TextInput
+                type="number"
+                min={1}
+                max={100}
+                value={count}
+                onChange={(e) => setCount(Number(e.target.value))}
+                className="w-full sm:w-36 font-mono"
+              />
+            </div>
+            <div className="flex flex-col justify-end gap-0.5 pb-1">
+              <CheckBox checked={upper} onChange={setUpper}>大写</CheckBox>
+              <CheckBox checked={noHyphen} onChange={setNoHyphen}>去横线</CheckBox>
+              <CheckBox checked={curly} onChange={setCurly}>加花括号</CheckBox>
+            </div>
+          </div>
 
-      {/* 选项 */}
-      <div className="mb-4 flex flex-wrap gap-4">
-        <label className="flex min-h-[44px] cursor-pointer items-center gap-2 text-sm">
-          <input
-            type="checkbox"
-            checked={upper}
-            onChange={(e) => setUpper(e.target.checked)}
-          />
-          大写
-        </label>
-        <label className="flex min-h-[44px] cursor-pointer items-center gap-2 text-sm">
-          <input
-            type="checkbox"
-            checked={noHyphen}
-            onChange={(e) => setNoHyphen(e.target.checked)}
-          />
-          去横线
-        </label>
-        <label className="flex min-h-[44px] cursor-pointer items-center gap-2 text-sm">
-          <input
-            type="checkbox"
-            checked={curly}
-            onChange={(e) => setCurly(e.target.checked)}
-          />
-          加花括号
-        </label>
-      </div>
-
-      {/* 操作按钮区 */}
-      <div className="mb-4 flex flex-wrap gap-2">
-        <button
-          type="button"
-          onClick={handleGenerate}
-          className="min-h-[44px] rounded-md bg-blue-600 px-4 text-sm text-white hover:bg-blue-700"
-        >
-          生成
-        </button>
-        <button
-          type="button"
-          onClick={fillExample}
-          className="min-h-[44px] rounded-md border border-gray-300 px-3 text-sm text-gray-700 dark:border-gray-600 dark:text-gray-200"
-        >
-          填入示例
-        </button>
-        <button
-          type="button"
-          onClick={reset}
-          className="min-h-[44px] rounded-md border border-gray-300 px-3 text-sm text-gray-700 dark:border-gray-600 dark:text-gray-200"
-        >
-          重置
-        </button>
-        {results.length > 0 && (
-          <CopyButton text={results.join('\n')} label="复制全部" />
-        )}
-      </div>
+          {/* 操作按钮区 */}
+          <div className="flex flex-wrap items-center gap-2">
+            <Btn variant="primary" onClick={handleGenerate}>
+              <HashIcon size={16} />
+              生成
+            </Btn>
+            <ExampleButton onClick={fillExample} />
+            <Btn variant="ghost" onClick={reset}>重置</Btn>
+            {results.length > 0 && (
+              <CopyButton text={results.join('\n')} label="复制全部" />
+            )}
+          </div>
+        </div>
+      </Card>
 
       {/* 输出区 */}
       {results.length > 0 && (
-        <div className="mb-3 space-y-1 rounded-md bg-gray-50 p-3 font-mono text-sm dark:bg-gray-800">
-          {results.map((uuid, i) => (
-            <div key={i} className="flex items-center justify-between gap-2">
-              <span className="break-all">{uuid}</span>
-              <CopyButton text={uuid} label="复制" />
-            </div>
-          ))}
-        </div>
+        <Card
+          title={`结果（${results.length} 条）`}
+          action={<CopyButton text={results.join('\n')} label="复制全部" iconOnly />}
+          bodyClassName="px-0 py-0"
+        >
+          <ul className="max-h-80 overflow-auto">
+            {results.map((uuid, i) => (
+              <li
+                key={i}
+                className="flex items-center justify-between gap-3 border-b border-slate-100 px-4 py-2.5 last:border-0 dark:border-slate-800/70"
+              >
+                <span className="min-w-0 break-all font-mono text-sm text-slate-700 dark:text-slate-300">
+                  {uuid}
+                </span>
+                <CopyButton text={uuid} label="复制" iconOnly className="h-9 w-9" />
+              </li>
+            ))}
+          </ul>
+        </Card>
       )}
 
       {/* 错误区 */}

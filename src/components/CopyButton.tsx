@@ -1,11 +1,19 @@
 import { useRef, useState } from 'react'
+import { CopyIcon, CheckIcon } from './Icons'
+import { Btn, BtnVariant } from './ui'
 
 export function CopyButton({
   text,
   label = '复制',
+  variant = 'secondary',
+  iconOnly = false,
+  className = '',
 }: {
   text: string
   label?: string
+  variant?: BtnVariant
+  iconOnly?: boolean
+  className?: string
 }) {
   const [copied, setCopied] = useState(false)
   const [failed, setFailed] = useState(false)
@@ -44,15 +52,34 @@ export function CopyButton({
     }
   }
 
-  const display = copied ? '已复制' : failed ? '复制失败' : label
+  if (iconOnly) {
+    return (
+      <button
+        type="button"
+        onClick={handleCopy}
+        disabled={copied || failed}
+        aria-label={copied ? '已复制' : failed ? '复制失败' : label}
+        className={`flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 disabled:cursor-default dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200 ${
+          copied
+            ? '!text-emerald-600 dark:!text-emerald-400'
+            : failed
+              ? '!text-red-500 dark:!text-red-400'
+              : ''
+        } ${className}`}
+      >
+        {copied ? <CheckIcon /> : failed ? <CopyIcon /> : <CopyIcon />}
+      </button>
+    )
+  }
 
   return (
-    <button
-      type="button"
+    <Btn
+      variant={variant}
+      className={className}
       onClick={handleCopy}
-      className="flex min-h-[44px] items-center justify-center rounded-md border border-gray-300 px-3 text-sm text-gray-700 dark:border-gray-600 dark:text-gray-200"
     >
-      {display}
-    </button>
+      {copied ? <CheckIcon size={16} /> : null}
+      {copied ? '已复制' : failed ? '复制失败' : label}
+    </Btn>
   )
 }

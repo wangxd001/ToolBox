@@ -44,3 +44,7 @@ pnpm-debug.log*
 # Python 字节码缓存（ui-ux-pro-max skill 脚本产生）
 __pycache__/
 *.pyc
+
+# UI 验收截图（Playwright 产物，本地）
+docs/screenshots/
+docs/ui-check.mjs

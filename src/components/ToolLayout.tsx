@@ -11,9 +11,11 @@ export function ToolLayout({
 }) {
   return (
     <div>
-      <h1 className="mb-1 text-xl font-bold">{title}</h1>
-      <p className="mb-4 text-sm text-gray-600 dark:text-gray-400">{description}</p>
-      <div>{children}</div>
+      <header className="mb-6">
+        <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
+        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{description}</p>
+      </header>
+      <div className="space-y-4">{children}</div>
     </div>
   )
 }

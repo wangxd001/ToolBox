@@ -2,8 +2,11 @@ import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { ToolLayout } from '../../components/ToolLayout'
 import { CopyButton } from '../../components/CopyButton'
-import { ErrorText } from '../../components/ErrorText'
+import { ErrorText, Toast } from '../../components/ErrorText'
+import { ExampleButton } from '../../components/ExampleButton'
 import { HistoryPanel } from '../../components/HistoryPanel'
+import { Card, Btn, Label, TextArea, Segmented, CheckBox } from '../../components/ui'
+import { Base64Icon } from '../../components/Icons'
 import { useSeo } from '../../lib/useSeo'
 import {
   readHistory,
@@ -131,69 +134,65 @@ export function Base64Page() {
 
   return (
     <ToolLayout title="Base64 编解码" description="UTF-8 安全的 Base64 编解码，可选 URL-safe 模式">
-      {/* 模式切换 */}
-      <div className="mb-4 flex gap-2">
-        <button
-          type="button"
-          onClick={() => setMode('encode')}
-          className={`min-h-[44px] flex-1 rounded-md px-3 text-sm ${mode === 'encode' ? 'bg-blue-600 text-white' : 'bg-gray-100 dark:bg-gray-800'}`}
-        >
-          编码
-        </button>
-        <button
-          type="button"
-          onClick={() => setMode('decode')}
-          className={`min-h-[44px] flex-1 rounded-md px-3 text-sm ${mode === 'decode' ? 'bg-blue-600 text-white' : 'bg-gray-100 dark:bg-gray-800'}`}
-        >
-          解码
-        </button>
-      </div>
-
-      {/* 输入区 */}
-      <div className="mb-3">
-        <label className="mb-1 block text-sm text-gray-600 dark:text-gray-400">
-          {mode === 'encode' ? '文本' : 'Base64'}
-        </label>
-        <textarea
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          rows={4}
-          className="w-full rounded-md border border-gray-300 p-3 font-mono text-sm min-h-[44px] dark:border-gray-600 dark:bg-gray-800"
-        />
-      </div>
-
-      {/* URL-safe 开关 */}
-      <label className="mb-3 flex min-h-[44px] cursor-pointer items-center gap-2 text-sm">
-        <input type="checkbox" checked={urlSafe} onChange={(e) => setUrlSafe(e.target.checked)} />
-        URL-safe 模式（-/_ 替代 +/-，去 padding）
-      </label>
+      {/* 模式 + 输入 */}
+      <Card
+        title="输入"
+        action={
+          <Segmented
+            options={[
+              { value: 'encode', label: '编码' },
+              { value: 'decode', label: '解码' },
+            ]}
+            value={mode}
+            onChange={(v) => setMode(v as 'encode' | 'decode')}
+            className="w-40"
+          />
+        }
+      >
+        <div className="space-y-4">
+          <div>
+            <Label>{mode === 'encode' ? '文本' : 'Base64'}</Label>
+            <TextArea
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              rows={4}
+            />
+          </div>
+          <CheckBox checked={urlSafe} onChange={setUrlSafe}>
+            URL-safe 模式（-/_ 替代 +/-，去 padding）
+          </CheckBox>
+        </div>
+      </Card>
 
       {/* 操作按钮区 */}
-      <div className="mb-4 flex flex-wrap gap-2">
-        <button type="button" onClick={handleRun} className="min-h-[44px] rounded-md bg-blue-600 px-4 text-sm text-white hover:bg-blue-700">
-          {mode === 'encode' ? '编码' : '解码'}
-        </button>
-        <button type="button" onClick={fillExample} className="min-h-[44px] rounded-md border border-gray-300 px-3 text-sm text-gray-700 dark:border-gray-600 dark:text-gray-200">
-          填入示例
-        </button>
-        <button type="button" onClick={reset} className="min-h-[44px] rounded-md border border-gray-300 px-3 text-sm text-gray-700 dark:border-gray-600 dark:text-gray-200">
-          重置
-        </button>
-        {output && <CopyButton text={output} label="复制结果" />}
-      </div>
+      <Card bodyClassName="px-4 py-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <Btn variant="primary" onClick={handleRun}>
+            <Base64Icon size={16} />
+            {mode === 'encode' ? '编码' : '解码'}
+          </Btn>
+          <ExampleButton onClick={fillExample} />
+          <Btn variant="ghost" onClick={reset}>重置</Btn>
+          {output && <CopyButton text={output} label="复制结果" />}
+        </div>
+      </Card>
 
       {/* 输出区 */}
       {output && (
-        <div className="mb-3 rounded-md bg-gray-50 p-3 font-mono text-sm break-all dark:bg-gray-800">{output}</div>
+        <Card
+          title="结果"
+          action={<CopyButton text={output} label="复制" iconOnly />}
+          bodyClassName="px-0 py-0"
+        >
+          <div className="overflow-wrap-anywhere p-4 font-mono text-sm leading-relaxed text-slate-800 dark:text-slate-200">
+            {output}
+          </div>
+        </Card>
       )}
 
       {/* 错误区 */}
       <ErrorText message={error} />
-      {toast && (
-        <div className="mt-3 rounded-md bg-yellow-100 p-2 text-sm text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-200">
-          {toast}
-        </div>
-      )}
+      <Toast message={toast} />
 
       {/* 历史 */}
       <HistoryPanel
