@@ -121,3 +121,19 @@ export function TrashIcon(props: { size?: number }) {
     </Svg>
   )
 }
+
+export function MenuIcon(props: { size?: number }) {
+  return (
+    <Svg {...props}>
+      <path d="M4 7h16M4 12h16M4 17h16" />
+    </Svg>
+  )
+}
+
+export function ChevronDownIcon(props: { size?: number }) {
+  return (
+    <Svg {...props}>
+      <path d="m6 9 6 6 6-6" />
+    </Svg>
+  )
+}
