@@ -1,0 +1,46 @@
+# 依赖
+node_modules/
+.pnp
+.pnp.js
+
+# 构建产物
+dist/
+build/
+*.tsbuildinfo
+
+# 测试与覆盖率
+coverage/
+.nyc_output/
+
+# 本地环境 / 密钥
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# 编辑器与系统噪音
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 日志
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Cloudflare Pages 本地状态（若启用 wrangler 本地预览）
+.wrangler/
+
+# Vite dev 依赖预构建缓存（npm run dev 时自动重建）
+.vite/
+
+# Python 字节码缓存（ui-ux-pro-max skill 脚本产生）
+__pycache__/
+*.pyc
